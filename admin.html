@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="th"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b203e">
+<title>หลังบ้านจัดการเมนู | POLICE REPORT CENTER</title>
+<link rel="stylesheet" href="style.css">
+<script src="config.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.87.2" defer></script>
+<script src="common.js" defer></script><script src="admin.js" defer></script>
+</head><body>
+<header class="hero admin-hero"><div class="shell"><div class="topline">
+<a class="brand" href="index.html"><span class="brand-icon" aria-hidden="true">⬡</span><span><b>POLICE REPORT CENTER</b><small>ระบบจัดการเว็บไซต์รายงานงาน ป.</small></span></a>
+<a class="top-link" href="index.html">← กลับหน้าเว็บ</a>
+</div><div class="hero-content"><div><p class="eyebrow">ADMINISTRATION</p><h1>ระบบหลังบ้านจัดการเมนู</h1><p class="lede">เพิ่ม แก้ไข ลบ ซ่อน จัดลำดับปุ่มและหมวดเมนูได้ โดยไม่ต้องแก้ไขโค้ดหรืออัปโหลดเว็บใหม่</p></div></div></div></header>
+<main class="shell admin-main">
+  <div id="configAlert" class="setup-box hidden">ยังไม่ได้เชื่อมต่อฐานข้อมูล Supabase — เปิดไฟล์ <code>README.md</code> ทำตามขั้นตอน และกรอก Project URL กับ Publishable key ใน <code>config.js</code> ก่อนใช้งานหลังบ้าน</div>
+  <section id="loginPanel" class="login-panel">
+    <h2>🔐 เข้าสู่ระบบผู้ดูแล</h2><p>เฉพาะผู้ได้รับสิทธิ์แอดมินเท่านั้นที่เพิ่ม แก้ไข หรือลบรายการได้</p>
+    <form id="loginForm"><div class="field"><label for="email">อีเมลแอดมิน</label><input id="email" type="email" autocomplete="username" required placeholder="admin@example.com"></div><div class="field"><label for="password">รหัสผ่าน</label><input id="password" type="password" autocomplete="current-password" required placeholder="กรอกรหัสผ่าน"></div><button id="loginBtn" type="submit" class="primary-btn">เข้าสู่ระบบ</button></form>
+    <p id="authError" class="hidden" role="alert" style="color:#ab333c;margin-top:15px"></p>
+  </section>
+  <section id="adminPanel" class="hidden">
+    <div class="admin-head"><div><h2>จัดการข้อมูลเว็บไซต์ <span class="admin-status">● ผู้ดูแลระบบ</span></h2><p id="whoami"></p></div><div class="head-actions"><a class="outline-btn" href="index.html" target="_blank" rel="noopener noreferrer" style="text-decoration:none">↗ ดูหน้าเว็บจริง</a><button id="logoutBtn" class="subtle-btn" type="button">ออกจากระบบ</button></div></div>
+    <div class="tabs" role="tablist" aria-label="หมวดจัดการ">
+      <button type="button" class="tab active" id="tabLinks" aria-selected="true">🔗 จัดการปุ่มลิงก์</button><button type="button" class="tab" id="tabGroups" aria-selected="false">▤ จัดการหมวดเมนู</button>
+    </div>
+    <div id="linksPanel"><div class="toolbar"><div><h2>ปุ่มลิงก์ทั้งหมด</h2><p>เพิ่มหรือแก้ไขลิงก์พร้อมเลือกหมวดเมนูที่จะแสดง</p></div><button class="primary-btn" id="newLinkBtn" type="button">+ เพิ่มปุ่มใหม่</button></div><div id="adminLinks" class="list-stack"></div></div>
+    <div id="groupsPanel" class="hidden"><div class="toolbar"><div><h2>หมวดเมนูทั้งหมด</h2><p>สร้างหมวดใหม่ เช่น รายงานพิเศษ, แบบฟอร์ม, แม่แบบ Canva</p></div><button class="primary-btn" id="newGroupBtn" type="button">+ เพิ่มหมวดเมนู</button></div><div id="adminGroups" class="list-stack"></div></div>
+  </section>
+</main>
+<dialog id="linkDialog" aria-labelledby="linkDialogTitle"><div class="dialog-head"><h2 id="linkDialogTitle">เพิ่มปุ่ม</h2><button class="close-btn" type="button" data-close="linkDialog" aria-label="ปิด">×</button></div><form id="linkForm" class="dialog-body">
+  <input type="hidden" id="linkId"><div class="field"><label for="linkGroup">หมวดเมนู *</label><select id="linkGroup" required></select></div>
+  <div class="field"><label for="linkTitle">ชื่อปุ่ม *</label><input id="linkTitle" required maxlength="160" placeholder="เช่น รายงานตรวจจุดเสี่ยง"></div>
+  <div class="field"><label for="linkUrl">ลิงก์ปลายทาง (https://) *</label><input id="linkUrl" required type="url" maxlength="2000" placeholder="https://..." inputmode="url"></div>
+  <div class="field"><label for="linkDescription">คำอธิบายใต้ปุ่ม</label><textarea id="linkDescription" maxlength="800" placeholder="รายละเอียดสั้น ๆ"></textarea></div>
+  <div class="admin-grid"><div class="field"><label for="linkSource">ประเภทลิงก์</label><select id="linkSource"><option>Google Sheets</option><option>Canva</option><option>Google Drive</option><option>Google Forms</option><option>เว็บไซต์</option><option>อื่น ๆ</option></select></div>
+  <div class="field"><label for="linkOrder">ลำดับการแสดง</label><input id="linkOrder" type="number" min="0" max="99999" step="1" value="10"></div></div>
+  <label class="check-field"><input type="checkbox" id="linkRequired" checked> นับในเช็กลิสต์รายงานประจำวัน</label>
+  <label class="check-field"><input type="checkbox" id="linkActive" checked> เปิดแสดงปุ่มนี้บนหน้าเว็บ</label>
+  <div class="dialog-actions"><button class="outline-btn" type="button" data-close="linkDialog">ยกเลิก</button><button class="primary-btn" type="submit" id="saveLinkBtn">บันทึกปุ่ม</button></div>
+</form></dialog>
+<dialog id="groupDialog" aria-labelledby="groupDialogTitle"><div class="dialog-head"><h2 id="groupDialogTitle">เพิ่มหมวดเมนู</h2><button class="close-btn" type="button" data-close="groupDialog" aria-label="ปิด">×</button></div><form id="groupForm" class="dialog-body">
+  <input type="hidden" id="groupId"><div class="field"><label for="groupTitle">ชื่อหมวดเมนู *</label><input id="groupTitle" maxlength="160" required placeholder="เช่น รายงานผลการตรวจ ว.4"></div>
+  <div class="field"><label for="groupSubtitle">คำอธิบายใต้หัวข้อ</label><input id="groupSubtitle" maxlength="300" placeholder="เช่น รายงานประจำวัน"></div>
+  <div class="admin-grid"><div class="field"><label for="groupDeadline">ป้ายกำหนดเวลา (ไม่จำเป็น)</label><input id="groupDeadline" maxlength="80" placeholder="ก่อน 08.00 น."></div><div class="field"><label for="groupKind">รูปแบบหมวด</label><select id="groupKind"><option value="report">รายงาน (มีเช็กลิสต์)</option><option value="resource">เครื่องมือ / แม่แบบ</option></select></div></div>
+  <div class="field"><label for="groupOrder">ลำดับหมวด</label><input id="groupOrder" type="number" min="0" max="99999" step="1" value="10"></div>
+  <label class="check-field"><input type="checkbox" id="groupActive" checked> เปิดแสดงหมวดนี้บนหน้าเว็บ</label>
+  <div class="dialog-actions"><button class="outline-btn" type="button" data-close="groupDialog">ยกเลิก</button><button class="primary-btn" type="submit" id="saveGroupBtn">บันทึกหมวด</button></div>
+</form></dialog>
+<footer class="shell footer"><span>ระบบจัดการศูนย์รวมลิงก์รายงานงาน ป. · ภ.จว.ปราจีนบุรี</span><span>การเปลี่ยนแปลงข้อมูลจะใช้กับผู้เปิดเว็บทุกคนเมื่อโหลดหน้าจอใหม่</span></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body></html>
